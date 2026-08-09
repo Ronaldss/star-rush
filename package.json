@@ -1,0 +1,13 @@
+{
+  "name": "star-rush",
+  "version": "1.0.0",
+  "description": "Mini game multiplayer 2D simples com Node.js, Express e Socket.IO.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1"
+  }
+}

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Star Rush</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="join-screen" id="join-screen">
+        <div class="join-card">
+          <p class="eyebrow">Mini game multiplayer</p>
+          <h1>STAR RUSH</h1>
+          <p class="subtitle">Entre na arena, colete estrelas e tente liderar o placar em 60 segundos.</p>
+          <label class="field-label" for="nickname">Digite seu apelido:</label>
+          <input id="nickname" maxlength="12" autocomplete="off" placeholder="Seu nome" />
+          <button id="play-button">JOGAR</button>
+          <p class="status-message" id="join-message"></p>
+        </div>
+      </section>
+
+      <section class="game-screen hidden" id="game-screen">
+        <header class="hud-bar">
+          <div class="game-title">STAR RUSH</div>
+          <div class="timer-pill" id="timer">TEMPO: 60s</div>
+        </header>
+
+        <div class="arena-layout">
+          <div class="play-area">
+            <div class="canvas-card">
+            <canvas id="game-canvas" width="900" height="600"></canvas>
+            <div class="winner-banner hidden" id="winner-banner"></div>
+            </div>
+
+            <section class="touch-controls" aria-label="Controles por toque">
+              <p class="controls-title">Controles</p>
+              <div class="dpad-grid">
+                <button class="control-button up" data-controls="ArrowUp,KeyW" aria-label="Mover para cima">▲</button>
+                <button class="control-button left" data-controls="ArrowLeft,KeyA" aria-label="Mover para a esquerda">◀</button>
+                <button class="control-button right" data-controls="ArrowRight,KeyD" aria-label="Mover para a direita">▶</button>
+                <button class="control-button down" data-controls="ArrowDown,KeyS" aria-label="Mover para baixo">▼</button>
+              </div>
+            </section>
+          </div>
+
+          <aside class="scoreboard">
+            <h2>PLACAR</h2>
+            <div class="score-list" id="score-list"></div>
+            <p class="score-hint" id="score-hint">Use WASD ou as setas para correr pela arena.</p>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/game.js"></script>
+  </body>
+</html>
