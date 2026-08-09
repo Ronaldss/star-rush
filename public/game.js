@@ -24,9 +24,13 @@ const state = {
   timeLeft: 60,
   effects: [],
   keys: {},
+  localPlayer: null,
+  lastSentAt: 0,
 };
 
 const PLAYER_SPEED = 4;
+const SERVER_SYNC_INTERVAL = 50;
+const SNAP_DISTANCE = 28;
 const MOBILE_HINT = "Segure os botoes para mover no celular. Teclado continua funcionando no desktop.";
 const DESKTOP_HINT = "Use WASD ou as setas para correr pela arena.";
 
@@ -145,9 +149,11 @@ function drawStar(star) {
 
 function drawPlayer(player) {
   const isCurrentPlayer = player.id === state.playerId;
+  const drawX = isCurrentPlayer && state.localPlayer ? state.localPlayer.x : player.x;
+  const drawY = isCurrentPlayer && state.localPlayer ? state.localPlayer.y : player.y;
 
   context.save();
-  context.translate(player.x, player.y);
+  context.translate(drawX, drawY);
 
   context.fillStyle = player.color;
   context.shadowColor = `${player.color}99`;
@@ -180,7 +186,7 @@ function drawPlayer(player) {
   context.fillStyle = "#ffffff";
   context.font = "bold 14px Trebuchet MS";
   context.textAlign = "center";
-  context.fillText(player.nickname, player.x, player.y - 28);
+  context.fillText(player.nickname, drawX, drawY - 28);
 }
 
 function drawEffects(now) {
@@ -214,6 +220,28 @@ function syncGameState(gameState) {
   state.timeLeft = gameState.timeLeft;
   state.roundActive = gameState.roundActive;
 
+  const serverPlayer = gameState.players[state.playerId];
+  if (serverPlayer) {
+    if (!state.localPlayer) {
+      state.localPlayer = {
+        x: serverPlayer.x,
+        y: serverPlayer.y,
+      };
+    } else {
+      const dx = serverPlayer.x - state.localPlayer.x;
+      const dy = serverPlayer.y - state.localPlayer.y;
+      const distance = Math.hypot(dx, dy);
+
+      if (distance > SNAP_DISTANCE) {
+        state.localPlayer.x = serverPlayer.x;
+        state.localPlayer.y = serverPlayer.y;
+      } else {
+        state.localPlayer.x += dx * 0.35;
+        state.localPlayer.y += dy * 0.35;
+      }
+    }
+  }
+
   timerElement.textContent = `TEMPO: ${gameState.timeLeft}s`;
   updateScoreboard();
 
@@ -229,8 +257,7 @@ function moveCurrentPlayer() {
     return;
   }
 
-  const player = state.players[state.playerId];
-  if (!player) {
+  if (!state.localPlayer) {
     return;
   }
 
@@ -254,10 +281,17 @@ function moveCurrentPlayer() {
     return;
   }
 
-  const nextX = Math.max(18, Math.min(state.arena.width - 18, player.x + dx));
-  const nextY = Math.max(18, Math.min(state.arena.height - 18, player.y + dy));
+  state.localPlayer.x = Math.max(18, Math.min(state.arena.width - 18, state.localPlayer.x + dx));
+  state.localPlayer.y = Math.max(18, Math.min(state.arena.height - 18, state.localPlayer.y + dy));
 
-  socket.emit("playerMove", { x: nextX, y: nextY });
+  const now = performance.now();
+  if (now - state.lastSentAt >= SERVER_SYNC_INTERVAL) {
+    state.lastSentAt = now;
+    socket.emit("playerMove", {
+      x: state.localPlayer.x,
+      y: state.localPlayer.y,
+    });
+  }
 }
 
 function gameLoop() {
@@ -333,6 +367,8 @@ playButton.addEventListener("click", () => {
 
     state.playerId = response.playerId;
     state.joined = true;
+    state.localPlayer = null;
+    state.lastSentAt = 0;
     joinScreen.classList.add("hidden");
     gameScreen.classList.remove("hidden");
   });
@@ -383,6 +419,7 @@ socket.on("disconnect", () => {
   joinScreen.classList.remove("hidden");
   gameScreen.classList.add("hidden");
   state.joined = false;
+  state.localPlayer = null;
 });
 
 bindTouchControls();
