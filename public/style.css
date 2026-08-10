@@ -189,7 +189,50 @@ canvas {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  pointer-events: none;
+}
+
+.topbar-left,
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-pill,
+.fullscreen-button {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(7, 14, 32, 0.46);
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 24px rgba(7, 14, 32, 0.24);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.status-pill {
+  color: var(--success);
+}
+
+.status-pill.is-warning {
+  color: var(--accent);
+}
+
+.status-pill.is-danger {
+  color: var(--danger);
+}
+
+.fullscreen-button {
+  width: auto;
+  margin: 0;
+  color: var(--text);
+  background: rgba(7, 14, 32, 0.42);
+  box-shadow: 0 10px 24px rgba(7, 14, 32, 0.2);
+}
+
+.fullscreen-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(7, 14, 32, 0.24);
 }
 
 .touch-controls {
@@ -418,8 +461,15 @@ canvas {
     gap: 8px;
   }
 
+  .topbar-left,
+  .topbar-right {
+    gap: 6px;
+  }
+
   .game-title,
-  .timer-pill {
+  .timer-pill,
+  .status-pill,
+  .fullscreen-button {
     padding: 8px 12px;
     font-size: 0.78rem;
   }
@@ -462,6 +512,10 @@ canvas {
   .scoreboard-toggle {
     display: inline-flex;
   }
+
+  .status-pill {
+    display: none;
+  }
 }
 
 @media (pointer: coarse), (max-width: 900px) {
@@ -488,6 +542,12 @@ canvas {
   .joystick-shell {
     width: 88px;
   }
+
+  .fullscreen-button {
+    display: inline-flex;
+    padding: 7px 10px;
+    font-size: 0.68rem;
+  }
 }
 
 @media (pointer: coarse) and (orientation: landscape) {
@@ -510,5 +570,11 @@ canvas {
     right: 8px;
     width: 136px;
     max-height: 52vh;
+  }
+
+  .fullscreen-button {
+    display: inline-flex;
+    padding: 6px 10px;
+    font-size: 0.66rem;
   }
 }

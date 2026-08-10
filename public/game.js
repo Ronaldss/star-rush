@@ -6,10 +6,12 @@ const nicknameInput = document.getElementById("nickname");
 const playButton = document.getElementById("play-button");
 const joinMessage = document.getElementById("join-message");
 const timerElement = document.getElementById("timer");
+const statusPill = document.getElementById("status-pill");
 const scoreList = document.getElementById("score-list");
 const scoreHint = document.getElementById("score-hint");
 const scoreboard = document.querySelector(".scoreboard");
 const scoreboardToggle = document.getElementById("scoreboard-toggle");
+const fullscreenButton = document.getElementById("fullscreen-button");
 const winnerBanner = document.getElementById("winner-banner");
 const canvas = document.getElementById("game-canvas");
 const context = canvas.getContext("2d");
@@ -80,6 +82,23 @@ function updateViewportCanvas() {
 function setJoinMessage(message, isError = true) {
   joinMessage.textContent = message;
   joinMessage.style.color = isError ? "var(--danger)" : "var(--success)";
+}
+
+function setStatusPill(message, tone = "success") {
+  if (!statusPill) {
+    return;
+  }
+
+  statusPill.textContent = message;
+  statusPill.classList.remove("is-warning", "is-danger");
+
+  if (tone === "warning") {
+    statusPill.classList.add("is-warning");
+  }
+
+  if (tone === "danger") {
+    statusPill.classList.add("is-danger");
+  }
 }
 
 function isMovementActive() {
@@ -486,12 +505,14 @@ playButton.addEventListener("click", () => {
 
   playButton.disabled = true;
   setJoinMessage("Entrando na arena...", false);
+  setStatusPill("Entrando...", "warning");
 
   socket.emit("joinGame", { nickname }, (response) => {
     playButton.disabled = false;
 
     if (!response?.ok) {
       setJoinMessage(response?.message || "Nao foi possivel entrar.");
+      setStatusPill("Falha na entrada", "danger");
       return;
     }
 
@@ -503,6 +524,7 @@ playButton.addEventListener("click", () => {
     state.renderPlayers = {};
     joinScreen.classList.add("hidden");
     gameScreen.classList.remove("hidden");
+    setStatusPill("Conectado");
   });
 });
 
@@ -553,12 +575,22 @@ socket.on("disconnect", () => {
   state.joined = false;
   state.localPlayer = null;
   state.renderPlayers = {};
+  setStatusPill("Desconectado", "danger");
+});
+
+socket.on("connect", () => {
+  setStatusPill(state.joined ? "Conectado" : "Pronto");
+});
+
+socket.on("connect_error", () => {
+  setStatusPill("Reconectando...", "warning");
 });
 
 bindTouchControls();
 updateControlHint();
 updateViewportCanvas();
 updateScoreboardMode();
+setStatusPill("Pronto");
 
 if (scoreboardToggle) {
   scoreboardToggle.addEventListener("click", () => {
@@ -574,6 +606,20 @@ window.addEventListener("resize", () => {
   updateViewportCanvas();
   updateScoreboardMode();
 });
+
+if (fullscreenButton) {
+  fullscreenButton.addEventListener("click", async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    } catch (_error) {
+      setStatusPill("Tela cheia indisponivel", "warning");
+    }
+  });
+}
 
 render();
 gameLoop();

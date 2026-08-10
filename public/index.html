@@ -26,8 +26,16 @@
             <canvas id="game-canvas" width="900" height="600"></canvas>
 
             <div class="arena-overlay arena-topbar">
-              <div class="game-title">STAR RUSH</div>
-              <div class="timer-pill" id="timer">TEMPO: 60s</div>
+              <div class="topbar-left">
+                <div class="game-title">STAR RUSH</div>
+                <div class="status-pill" id="status-pill">Conectando...</div>
+              </div>
+              <div class="topbar-right">
+                <button class="fullscreen-button" id="fullscreen-button" type="button" aria-label="Ativar tela cheia">
+                  TELA CHEIA
+                </button>
+                <div class="timer-pill" id="timer">TEMPO: 60s</div>
+              </div>
             </div>
 
             <aside class="arena-overlay scoreboard">
