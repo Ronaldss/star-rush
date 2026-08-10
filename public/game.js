@@ -38,6 +38,7 @@ const SNAP_DISTANCE = 80;
 const REMOTE_LERP = 0.18;
 const LOCAL_IDLE_LERP = 0.2;
 const JOYSTICK_RADIUS = 70;
+const TOUCH_DEADZONE = 0.12;
 const MOBILE_HINT = "Arraste o joystick virtual para mover no celular. Teclado continua funcionando no desktop.";
 const DESKTOP_HINT = "Use WASD ou as setas para correr pela arena.";
 
@@ -384,9 +385,11 @@ function updateJoystickFromEvent(event) {
   const angle = Math.atan2(rawY, rawX);
   const offsetX = Math.cos(angle) * limitedDistance;
   const offsetY = Math.sin(angle) * limitedDistance;
+  const normalizedX = offsetX / JOYSTICK_RADIUS;
+  const normalizedY = offsetY / JOYSTICK_RADIUS;
 
-  state.touchVector.x = Number((offsetX / JOYSTICK_RADIUS).toFixed(3));
-  state.touchVector.y = Number((offsetY / JOYSTICK_RADIUS).toFixed(3));
+  state.touchVector.x = Math.abs(normalizedX) < TOUCH_DEADZONE ? 0 : Number(normalizedX.toFixed(3));
+  state.touchVector.y = Math.abs(normalizedY) < TOUCH_DEADZONE ? 0 : Number(normalizedY.toFixed(3));
   joystickKnob.style.transform = `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`;
 }
 
@@ -455,6 +458,7 @@ playButton.addEventListener("click", () => {
       return;
     }
 
+    nicknameInput.blur();
     state.playerId = response.playerId;
     state.joined = true;
     state.localPlayer = null;

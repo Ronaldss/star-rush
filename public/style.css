@@ -142,6 +142,9 @@ button:hover {
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 18px;
+  position: sticky;
+  top: 10px;
+  z-index: 5;
 }
 
 .game-title,
@@ -264,9 +267,28 @@ canvas {
   border-radius: 28px;
 }
 
+.scoreboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
 .scoreboard h2 {
-  margin: 0 0 18px;
+  margin: 0;
   font-size: 1.35rem;
+}
+
+.mobile-badge {
+  display: none;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 213, 79, 0.18);
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
 }
 
 .score-list {
@@ -315,6 +337,15 @@ canvas {
   line-height: 1.5;
 }
 
+.scoreboard::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scoreboard::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+}
+
 @keyframes float-in {
   from {
     opacity: 0;
@@ -335,7 +366,8 @@ canvas {
 
 @media (max-width: 720px) {
   .app-shell {
-    padding: 12px;
+    padding: 10px;
+    align-items: start;
   }
 
   .join-card {
@@ -344,23 +376,57 @@ canvas {
   }
 
   .hud-bar {
-    flex-direction: column;
-    align-items: stretch;
+    position: sticky;
+    top: 8px;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
   }
 
   .canvas-card {
-    padding: 10px;
+    padding: 8px;
     border-radius: 24px;
   }
 
   .scoreboard {
-    padding: 18px;
+    padding: 14px;
     border-radius: 24px;
+    max-height: 220px;
+    overflow: auto;
   }
 
   .winner-banner {
     width: calc(100% - 28px);
     padding: 18px 16px;
+  }
+
+  .game-title,
+  .timer-pill {
+    padding: 10px 14px;
+    font-size: 0.9rem;
+  }
+
+  .scoreboard-header {
+    margin-bottom: 12px;
+  }
+
+  .scoreboard h2 {
+    font-size: 1.1rem;
+  }
+
+  .score-item {
+    padding: 10px 12px;
+    border-radius: 16px;
+  }
+
+  .score-hint {
+    font-size: 0.88rem;
+    margin-top: 12px;
+  }
+
+  .mobile-badge {
+    display: inline-flex;
   }
 }
 
@@ -369,7 +435,105 @@ canvas {
     display: block;
   }
 
+  .arena-layout {
+    gap: 14px;
+  }
+
+  .play-area {
+    gap: 12px;
+  }
+
   .score-hint {
     margin-top: 14px;
+  }
+}
+
+@media (pointer: coarse) and (orientation: portrait) {
+  .app-shell {
+    padding: 8px;
+  }
+
+  .hud-bar {
+    top: 4px;
+  }
+
+  .arena-layout {
+    gap: 10px;
+  }
+
+  .canvas-card {
+    padding: 6px;
+  }
+
+  canvas {
+    border-radius: 18px;
+  }
+
+  .touch-controls {
+    padding: 14px;
+    border-radius: 22px;
+  }
+
+  .joystick-shell {
+    width: min(250px, 100%);
+  }
+
+  .joystick-base {
+    max-width: 180px;
+  }
+
+  .scoreboard {
+    order: -1;
+    padding: 12px;
+    max-height: none;
+  }
+
+  .score-list {
+    gap: 8px;
+  }
+
+  .score-item {
+    padding: 9px 10px;
+  }
+}
+
+@media (pointer: coarse) and (orientation: landscape) {
+  .app-shell {
+    padding: 8px;
+  }
+
+  .arena-layout {
+    grid-template-columns: minmax(0, 1fr) 220px;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .play-area {
+    gap: 10px;
+  }
+
+  .canvas-card {
+    padding: 8px;
+  }
+
+  .touch-controls {
+    padding: 12px;
+  }
+
+  .joystick-shell {
+    width: min(220px, 100%);
+  }
+
+  .joystick-base {
+    max-width: 150px;
+  }
+
+  .scoreboard {
+    max-height: unset;
+    height: 100%;
+  }
+
+  .score-hint {
+    font-size: 0.82rem;
   }
 }
