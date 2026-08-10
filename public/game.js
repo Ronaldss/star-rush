@@ -33,12 +33,12 @@ const state = {
 };
 
 const PLAYER_SPEED = 4;
+const TOUCH_SPEED_MULTIPLIER = 1.45;
 const SERVER_SYNC_INTERVAL = 50;
 const SNAP_DISTANCE = 80;
 const REMOTE_LERP = 0.18;
 const LOCAL_IDLE_LERP = 0.2;
-const JOYSTICK_RADIUS = 70;
-const TOUCH_DEADZONE = 0.12;
+const TOUCH_DEADZONE = 0.06;
 const MOBILE_HINT = "Arraste o joystick virtual para mover no celular. Teclado continua funcionando no desktop.";
 const DESKTOP_HINT = "Use WASD ou as setas para correr pela arena.";
 
@@ -327,8 +327,8 @@ function moveCurrentPlayer() {
     dx += PLAYER_SPEED;
   }
 
-  dx += state.touchVector.x * PLAYER_SPEED;
-  dy += state.touchVector.y * PLAYER_SPEED;
+  dx += state.touchVector.x * PLAYER_SPEED * TOUCH_SPEED_MULTIPLIER;
+  dy += state.touchVector.y * PLAYER_SPEED * TOUCH_SPEED_MULTIPLIER;
 
   if (!dx && !dy) {
     return;
@@ -376,17 +376,18 @@ function updateJoystickFromEvent(event) {
   }
 
   const rect = joystickBase.getBoundingClientRect();
+  const joystickRadius = rect.width * 0.5;
   const centerX = rect.left + rect.width / 2;
   const centerY = rect.top + rect.height / 2;
   const rawX = event.clientX - centerX;
   const rawY = event.clientY - centerY;
   const distance = Math.hypot(rawX, rawY);
-  const limitedDistance = Math.min(distance, JOYSTICK_RADIUS);
+  const limitedDistance = Math.min(distance, joystickRadius);
   const angle = Math.atan2(rawY, rawX);
   const offsetX = Math.cos(angle) * limitedDistance;
   const offsetY = Math.sin(angle) * limitedDistance;
-  const normalizedX = offsetX / JOYSTICK_RADIUS;
-  const normalizedY = offsetY / JOYSTICK_RADIUS;
+  const normalizedX = offsetX / joystickRadius;
+  const normalizedY = offsetY / joystickRadius;
 
   state.touchVector.x = Math.abs(normalizedX) < TOUCH_DEADZONE ? 0 : Number(normalizedX.toFixed(3));
   state.touchVector.y = Math.abs(normalizedY) < TOUCH_DEADZONE ? 0 : Number(normalizedY.toFixed(3));

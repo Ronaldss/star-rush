@@ -21,35 +21,35 @@
       </section>
 
       <section class="game-screen hidden" id="game-screen">
-        <header class="hud-bar">
-          <div class="game-title">STAR RUSH</div>
-          <div class="timer-pill" id="timer">TEMPO: 60s</div>
-        </header>
+        <div class="arena-stage">
+          <div class="canvas-card">
+            <canvas id="game-canvas" width="900" height="600"></canvas>
 
-        <div class="arena-layout">
-          <div class="play-area">
-            <div class="canvas-card">
-              <canvas id="game-canvas" width="900" height="600"></canvas>
-              <div class="winner-banner hidden" id="winner-banner"></div>
-              <section class="touch-controls" aria-label="Controles por toque">
-                <div class="joystick-shell">
-                  <div class="joystick-base" id="joystick-base" aria-label="Joystick virtual">
-                    <div class="joystick-ring"></div>
-                    <div class="joystick-knob" id="joystick-knob"></div>
-                  </div>
+            <div class="arena-overlay arena-topbar">
+              <div class="game-title">STAR RUSH</div>
+              <div class="timer-pill" id="timer">TEMPO: 60s</div>
+            </div>
+
+            <aside class="arena-overlay scoreboard">
+              <div class="scoreboard-header">
+                <h2>PLACAR</h2>
+                <span class="mobile-badge">TOP 4</span>
+              </div>
+              <div class="score-list" id="score-list"></div>
+              <p class="score-hint" id="score-hint">Use WASD ou as setas para correr pela arena.</p>
+            </aside>
+
+            <div class="winner-banner hidden" id="winner-banner"></div>
+
+            <section class="touch-controls" aria-label="Controles por toque">
+              <div class="joystick-shell">
+                <div class="joystick-base" id="joystick-base" aria-label="Joystick virtual">
+                  <div class="joystick-ring"></div>
+                  <div class="joystick-knob" id="joystick-knob"></div>
                 </div>
-              </section>
-            </div>
+              </div>
+            </section>
           </div>
-
-          <aside class="scoreboard">
-            <div class="scoreboard-header">
-              <h2>PLACAR</h2>
-              <span class="mobile-badge">TOP 4</span>
-            </div>
-            <div class="score-list" id="score-list"></div>
-            <p class="score-hint" id="score-hint">Use WASD ou as setas para correr pela arena.</p>
-          </aside>
         </div>
       </section>
     </main>
