@@ -11,7 +11,8 @@ const scoreHint = document.getElementById("score-hint");
 const winnerBanner = document.getElementById("winner-banner");
 const canvas = document.getElementById("game-canvas");
 const context = canvas.getContext("2d");
-const controlButtons = document.querySelectorAll(".control-button");
+const joystickBase = document.getElementById("joystick-base");
+const joystickKnob = document.getElementById("joystick-knob");
 
 const state = {
   playerId: null,
@@ -27,6 +28,8 @@ const state = {
   localPlayer: null,
   lastSentAt: 0,
   renderPlayers: {},
+  touchVector: { x: 0, y: 0 },
+  joystickPointerId: null,
 };
 
 const PLAYER_SPEED = 4;
@@ -34,7 +37,8 @@ const SERVER_SYNC_INTERVAL = 50;
 const SNAP_DISTANCE = 80;
 const REMOTE_LERP = 0.18;
 const LOCAL_IDLE_LERP = 0.2;
-const MOBILE_HINT = "Segure os botoes para mover no celular. Teclado continua funcionando no desktop.";
+const JOYSTICK_RADIUS = 70;
+const MOBILE_HINT = "Arraste o joystick virtual para mover no celular. Teclado continua funcionando no desktop.";
 const DESKTOP_HINT = "Use WASD ou as setas para correr pela arena.";
 
 function sanitizeNickname(value) {
@@ -59,7 +63,9 @@ function isMovementActive() {
       state.keys.ArrowLeft ||
       state.keys.KeyA ||
       state.keys.ArrowRight ||
-      state.keys.KeyD
+      state.keys.KeyD ||
+      Math.abs(state.touchVector.x) > 0.05 ||
+      Math.abs(state.touchVector.y) > 0.05
   );
 }
 
@@ -320,6 +326,9 @@ function moveCurrentPlayer() {
     dx += PLAYER_SPEED;
   }
 
+  dx += state.touchVector.x * PLAYER_SPEED;
+  dy += state.touchVector.y * PLAYER_SPEED;
+
   if (!dx && !dy) {
     return;
   }
@@ -343,42 +352,76 @@ function moveCurrentPlayer() {
 
 function gameLoop() {
   moveCurrentPlayer();
+  syncRenderPlayers();
   requestAnimationFrame(gameLoop);
-}
-
-function setControlState(codes, isPressed, button) {
-  codes.forEach((code) => {
-    state.keys[code] = isPressed;
-  });
-
-  if (button) {
-    button.classList.toggle("active", isPressed);
-  }
-}
-
-function bindTouchControls() {
-  controlButtons.forEach((button) => {
-    const codes = button.dataset.controls.split(",");
-
-    const press = (event) => {
-      event.preventDefault();
-      setControlState(codes, true, button);
-    };
-
-    const release = (event) => {
-      event.preventDefault();
-      setControlState(codes, false, button);
-    };
-
-    button.addEventListener("pointerdown", press);
-    button.addEventListener("pointerup", release);
-    button.addEventListener("pointercancel", release);
-    button.addEventListener("pointerleave", release);
-  });
 }
 
 function updateControlHint() {
   scoreHint.textContent = isTouchDevice() ? MOBILE_HINT : DESKTOP_HINT;
+}
+
+function resetJoystick() {
+  state.touchVector.x = 0;
+  state.touchVector.y = 0;
+  state.joystickPointerId = null;
+  if (joystickKnob) {
+    joystickKnob.style.transform = "translate(-50%, -50%)";
+  }
+}
+
+function updateJoystickFromEvent(event) {
+  if (!joystickBase || !joystickKnob) {
+    return;
+  }
+
+  const rect = joystickBase.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+  const rawX = event.clientX - centerX;
+  const rawY = event.clientY - centerY;
+  const distance = Math.hypot(rawX, rawY);
+  const limitedDistance = Math.min(distance, JOYSTICK_RADIUS);
+  const angle = Math.atan2(rawY, rawX);
+  const offsetX = Math.cos(angle) * limitedDistance;
+  const offsetY = Math.sin(angle) * limitedDistance;
+
+  state.touchVector.x = Number((offsetX / JOYSTICK_RADIUS).toFixed(3));
+  state.touchVector.y = Number((offsetY / JOYSTICK_RADIUS).toFixed(3));
+  joystickKnob.style.transform = `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`;
+}
+
+function bindTouchControls() {
+  if (!joystickBase) {
+    return;
+  }
+
+  joystickBase.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    state.joystickPointerId = event.pointerId;
+    joystickBase.setPointerCapture(event.pointerId);
+    updateJoystickFromEvent(event);
+  });
+
+  joystickBase.addEventListener("pointermove", (event) => {
+    if (event.pointerId !== state.joystickPointerId) {
+      return;
+    }
+
+    event.preventDefault();
+    updateJoystickFromEvent(event);
+  });
+
+  const release = (event) => {
+    if (event.pointerId !== state.joystickPointerId) {
+      return;
+    }
+
+    event.preventDefault();
+    resetJoystick();
+  };
+
+  joystickBase.addEventListener("pointerup", release);
+  joystickBase.addEventListener("pointercancel", release);
 }
 
 function shouldHandleMovementKey(event) {
@@ -449,7 +492,7 @@ window.addEventListener("blur", () => {
   Object.keys(state.keys).forEach((code) => {
     state.keys[code] = false;
   });
-  controlButtons.forEach((button) => button.classList.remove("active"));
+  resetJoystick();
 });
 
 socket.on("gameState", syncGameState);

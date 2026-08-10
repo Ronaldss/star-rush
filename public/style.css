@@ -204,50 +204,44 @@ canvas {
   color: var(--text-soft);
 }
 
-.dpad-grid {
+.joystick-shell {
   width: min(280px, 100%);
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-areas:
-    ". up ."
-    "left . right"
-    ". down .";
-  gap: 12px;
 }
 
-.control-button {
+.joystick-base {
+  position: relative;
   width: 100%;
+  max-width: 220px;
   aspect-ratio: 1;
-  margin: 0;
-  padding: 0;
-  border-radius: 24px;
-  font-size: 2rem;
-  line-height: 1;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2), rgba(7, 14, 32, 0.6));
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 10px 22px rgba(255, 255, 255, 0.08), 0 16px 30px rgba(0, 0, 0, 0.2);
   user-select: none;
-  touch-action: manipulation;
+  touch-action: none;
   -webkit-tap-highlight-color: transparent;
 }
 
-.control-button.up {
-  grid-area: up;
+.joystick-ring {
+  position: absolute;
+  inset: 18%;
+  border-radius: 50%;
+  border: 2px dashed rgba(255, 255, 255, 0.16);
 }
 
-.control-button.left {
-  grid-area: left;
-}
-
-.control-button.right {
-  grid-area: right;
-}
-
-.control-button.down {
-  grid-area: down;
-}
-
-.control-button.active {
-  transform: scale(0.96);
-  box-shadow: 0 8px 18px rgba(255, 138, 0, 0.28);
+.joystick-knob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 38%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  box-shadow: 0 10px 22px rgba(255, 138, 0, 0.32);
+  transform: translate(-50%, -50%);
+  transition: transform 70ms linear;
 }
 
 .winner-banner {
