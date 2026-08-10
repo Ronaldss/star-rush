@@ -20,6 +20,7 @@
 body {
   margin: 0;
   min-height: 100vh;
+  overflow-x: hidden;
   font-family: "Trebuchet MS", "Segoe UI", sans-serif;
   color: var(--text);
   overscroll-behavior: none;
@@ -161,10 +162,13 @@ button:hover {
   padding: 10px;
   border-radius: 30px;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 canvas {
-  width: 100%;
+  width: min(100%, 960px);
   height: auto;
   display: block;
   border-radius: 22px;
@@ -275,8 +279,10 @@ canvas {
   font-size: 1rem;
 }
 
-.mobile-badge {
+.scoreboard-toggle {
   display: none;
+  width: auto;
+  margin: 0;
   padding: 6px 10px;
   border-radius: 999px;
   background: rgba(255, 213, 79, 0.18);
@@ -284,6 +290,26 @@ canvas {
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.08em;
+  box-shadow: none;
+}
+
+.scoreboard-toggle:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.scoreboard.is-collapsed .score-list,
+.scoreboard.is-collapsed .score-hint {
+  display: none;
+}
+
+.scoreboard.is-collapsed {
+  width: auto;
+  min-width: 112px;
+}
+
+.scoreboard.is-collapsed .scoreboard-header {
+  margin-bottom: 0;
 }
 
 .score-list {
@@ -376,6 +402,8 @@ canvas {
     padding: 0;
     border-radius: 0;
     border: none;
+    background: transparent;
+    box-shadow: none;
   }
 
   .winner-banner {
@@ -401,16 +429,37 @@ canvas {
   }
 
   .scoreboard {
-    top: 54px;
-    right: 10px;
-    width: min(168px, calc(100% - 20px));
-    padding: 10px;
-    border-radius: 18px;
-    max-height: 42vh;
+    top: 50px;
+    right: 8px;
+    width: min(148px, calc(100% - 16px));
+    padding: 8px;
+    border-radius: 16px;
+    max-height: 34vh;
     overflow: auto;
+    background: rgba(10, 21, 45, 0.42);
+    backdrop-filter: blur(8px);
   }
 
-  .mobile-badge {
+  .score-item {
+    padding: 7px 8px;
+    gap: 8px;
+  }
+
+  .score-dot {
+    width: 10px;
+    height: 10px;
+  }
+
+  .score-player,
+  .score-value {
+    font-size: 0.8rem;
+  }
+
+  .score-hint {
+    display: none;
+  }
+
+  .scoreboard-toggle {
     display: inline-flex;
   }
 }
@@ -422,9 +471,12 @@ canvas {
 }
 
 @media (pointer: coarse) and (orientation: portrait) {
+  .arena-stage,
+  .canvas-card {
+    width: 100vw;
+  }
+
   canvas {
-    min-height: 100dvh;
-    object-fit: cover;
     border-radius: 0;
   }
 
@@ -434,17 +486,29 @@ canvas {
   }
 
   .joystick-shell {
-    width: 96px;
+    width: 88px;
   }
 }
 
 @media (pointer: coarse) and (orientation: landscape) {
+  .arena-stage,
+  .canvas-card {
+    width: 100vw;
+  }
+
   .touch-controls {
-    left: 12px;
-    bottom: 12px;
+    left: 10px;
+    bottom: 10px;
   }
 
   .joystick-shell {
-    width: 82px;
+    width: 74px;
+  }
+
+  .scoreboard {
+    top: 46px;
+    right: 8px;
+    width: 136px;
+    max-height: 52vh;
   }
 }

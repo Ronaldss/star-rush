@@ -8,6 +8,8 @@ const joinMessage = document.getElementById("join-message");
 const timerElement = document.getElementById("timer");
 const scoreList = document.getElementById("score-list");
 const scoreHint = document.getElementById("score-hint");
+const scoreboard = document.querySelector(".scoreboard");
+const scoreboardToggle = document.getElementById("scoreboard-toggle");
 const winnerBanner = document.getElementById("winner-banner");
 const canvas = document.getElementById("game-canvas");
 const context = canvas.getContext("2d");
@@ -33,12 +35,12 @@ const state = {
 };
 
 const PLAYER_SPEED = 4;
-const TOUCH_SPEED_MULTIPLIER = 1.45;
+const TOUCH_SPEED_MULTIPLIER = 1.75;
 const SERVER_SYNC_INTERVAL = 50;
 const SNAP_DISTANCE = 80;
 const REMOTE_LERP = 0.18;
 const LOCAL_IDLE_LERP = 0.2;
-const TOUCH_DEADZONE = 0.06;
+const TOUCH_DEADZONE = 0.04;
 const MOBILE_HINT = "Arraste o joystick virtual para mover no celular. Teclado continua funcionando no desktop.";
 const DESKTOP_HINT = "Use WASD ou as setas para correr pela arena.";
 
@@ -48,6 +50,31 @@ function sanitizeNickname(value) {
 
 function isTouchDevice() {
   return window.matchMedia("(pointer: coarse)").matches || "ontouchstart" in window;
+}
+
+function updateViewportCanvas() {
+  if (!isTouchDevice()) {
+    canvas.style.width = "";
+    canvas.style.height = "";
+    return;
+  }
+
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+  const aspectRatio = state.arena.width / state.arena.height;
+  const maxWidth = viewportWidth;
+  const maxHeight = viewportHeight;
+
+  let renderWidth = maxWidth;
+  let renderHeight = renderWidth / aspectRatio;
+
+  if (renderHeight > maxHeight) {
+    renderHeight = maxHeight;
+    renderWidth = renderHeight * aspectRatio;
+  }
+
+  canvas.style.width = `${renderWidth}px`;
+  canvas.style.height = `${renderHeight}px`;
 }
 
 function setJoinMessage(message, isError = true) {
@@ -361,6 +388,15 @@ function updateControlHint() {
   scoreHint.textContent = isTouchDevice() ? MOBILE_HINT : DESKTOP_HINT;
 }
 
+function updateScoreboardMode() {
+  if (!scoreboard) {
+    return;
+  }
+
+  const shouldCollapse = isTouchDevice() && window.matchMedia("(orientation: portrait)").matches;
+  scoreboard.classList.toggle("is-collapsed", shouldCollapse);
+}
+
 function resetJoystick() {
   state.touchVector.x = 0;
   state.touchVector.y = 0;
@@ -521,5 +557,23 @@ socket.on("disconnect", () => {
 
 bindTouchControls();
 updateControlHint();
+updateViewportCanvas();
+updateScoreboardMode();
+
+if (scoreboardToggle) {
+  scoreboardToggle.addEventListener("click", () => {
+    if (!scoreboard) {
+      return;
+    }
+
+    scoreboard.classList.toggle("is-collapsed");
+  });
+}
+
+window.addEventListener("resize", () => {
+  updateViewportCanvas();
+  updateScoreboardMode();
+});
+
 render();
 gameLoop();
