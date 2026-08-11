@@ -153,7 +153,7 @@ button:hover {
 }
 
 .arena-stage {
-  width: min(980px, 100%);
+  width: min(1220px, 100%);
   margin: 0 auto;
 }
 
@@ -426,6 +426,23 @@ canvas {
 @media (max-width: 1120px) {
   .arena-stage {
     width: 100%;
+  }
+}
+
+@media (min-width: 901px) {
+  .canvas-card {
+    padding-right: 252px;
+  }
+
+  .scoreboard {
+    right: 10px;
+    width: 226px;
+    max-height: calc(100% - 20px);
+    overflow: auto;
+  }
+
+  .score-hint {
+    display: block;
   }
 }
 
