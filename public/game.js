@@ -34,12 +34,13 @@ const state = {
   renderPlayers: {},
   touchVector: { x: 0, y: 0 },
   joystickPointerId: null,
+  lastFrameAt: performance.now(),
 };
 
-const PLAYER_SPEED = 4;
-const TOUCH_SPEED_MULTIPLIER = 1.75;
-const SERVER_SYNC_INTERVAL = 50;
-const SNAP_DISTANCE = 80;
+const PLAYER_SPEED = 250;
+const TOUCH_SPEED_MULTIPLIER = 1.2;
+const SERVER_SYNC_INTERVAL = 33;
+const SNAP_DISTANCE = 140;
 const REMOTE_LERP = 0.18;
 const LOCAL_IDLE_LERP = 0.2;
 const TOUCH_DEADZONE = 0.04;
@@ -348,7 +349,7 @@ function syncGameState(gameState) {
   }
 }
 
-function moveCurrentPlayer() {
+function moveCurrentPlayer(deltaSeconds) {
   if (!state.joined || !state.roundActive) {
     return;
   }
@@ -380,8 +381,8 @@ function moveCurrentPlayer() {
     return;
   }
 
-  state.localPlayer.x = Math.max(18, Math.min(state.arena.width - 18, state.localPlayer.x + dx));
-  state.localPlayer.y = Math.max(18, Math.min(state.arena.height - 18, state.localPlayer.y + dy));
+  state.localPlayer.x = Math.max(18, Math.min(state.arena.width - 18, state.localPlayer.x + dx * deltaSeconds));
+  state.localPlayer.y = Math.max(18, Math.min(state.arena.height - 18, state.localPlayer.y + dy * deltaSeconds));
   state.renderPlayers[state.playerId] = {
     x: state.localPlayer.x,
     y: state.localPlayer.y,
@@ -397,8 +398,10 @@ function moveCurrentPlayer() {
   }
 }
 
-function gameLoop() {
-  moveCurrentPlayer();
+function gameLoop(frameAt = performance.now()) {
+  const deltaSeconds = Math.min(0.05, Math.max(0.001, (frameAt - state.lastFrameAt) / 1000));
+  state.lastFrameAt = frameAt;
+  moveCurrentPlayer(deltaSeconds);
   syncRenderPlayers();
   requestAnimationFrame(gameLoop);
 }
@@ -521,6 +524,7 @@ playButton.addEventListener("click", () => {
     state.joined = true;
     state.localPlayer = null;
     state.lastSentAt = 0;
+    state.lastFrameAt = performance.now();
     state.renderPlayers = {};
     joinScreen.classList.add("hidden");
     gameScreen.classList.remove("hidden");

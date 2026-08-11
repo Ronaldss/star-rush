@@ -434,6 +434,10 @@ canvas {
     padding-right: 252px;
   }
 
+  .arena-topbar {
+    right: 252px;
+  }
+
   .scoreboard {
     right: 10px;
     width: 226px;

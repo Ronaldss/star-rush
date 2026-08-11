@@ -15,6 +15,7 @@ const STAR_RADIUS = 14;
 const STAR_COUNT = 10;
 const ROUND_DURATION = 60;
 const ROUND_END_DELAY = 5000;
+const GAMESTATE_BROADCAST_INTERVAL = 50;
 const MAX_PLAYERS = 4;
 const COLORS = ["#2dd4bf", "#f97316", "#60a5fa", "#f472b6"];
 
@@ -25,6 +26,7 @@ let roundActive = true;
 let roundEndsAt = Date.now() + ROUND_DURATION * 1000;
 let nextColorIndex = 0;
 let shuttingDown = false;
+let gameStateDirty = true;
 
 function sanitizeNickname(value) {
   return String(value || "")
@@ -101,6 +103,10 @@ function emitGameState() {
   io.emit("gameState", getGameState());
 }
 
+function markGameStateDirty() {
+  gameStateDirty = true;
+}
+
 function resetRound() {
   timeLeft = ROUND_DURATION;
   roundActive = true;
@@ -114,7 +120,7 @@ function resetRound() {
     player.y = position.y;
   });
 
-  emitGameState();
+  markGameStateDirty();
 }
 
 function endRound() {
@@ -124,7 +130,7 @@ function endRound() {
 
   roundActive = false;
   timeLeft = 0;
-  emitGameState();
+  markGameStateDirty();
   setTimeout(resetRound, ROUND_END_DELAY);
 }
 
@@ -154,6 +160,13 @@ function tryCollectStar(player) {
 }
 
 setInterval(() => {
+  if (gameStateDirty) {
+    gameStateDirty = false;
+    emitGameState();
+  }
+}, GAMESTATE_BROADCAST_INTERVAL);
+
+setInterval(() => {
   if (!roundActive) {
     return;
   }
@@ -163,7 +176,7 @@ setInterval(() => {
 
   if (nextTimeLeft !== timeLeft) {
     timeLeft = nextTimeLeft;
-    emitGameState();
+    markGameStateDirty();
   }
 
   if (remainingMs <= 0) {
@@ -209,7 +222,8 @@ io.on("connection", (socket) => {
     };
 
     callback?.({ ok: true, playerId: socket.id });
-    emitGameState();
+    socket.emit("gameState", getGameState());
+    markGameStateDirty();
   });
 
   socket.on("playerMove", (payload = {}) => {
@@ -233,7 +247,7 @@ io.on("connection", (socket) => {
     player.y = Math.max(PLAYER_RADIUS, Math.min(ARENA_HEIGHT - PLAYER_RADIUS, nextY));
 
     tryCollectStar(player);
-    emitGameState();
+    markGameStateDirty();
   });
 
   socket.on("disconnect", () => {
@@ -242,11 +256,12 @@ io.on("connection", (socket) => {
     }
 
     delete players[socket.id];
-    emitGameState();
+    markGameStateDirty();
   });
 });
 
 refillStars();
+markGameStateDirty();
 
 app.get("/health", (_request, response) => {
   response.status(200).json({
